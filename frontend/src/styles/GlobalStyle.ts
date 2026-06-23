@@ -34,4 +34,11 @@ export const GlobalStyle = createGlobalStyle`
   * {
     box-sizing: border-box;
   }
+
+  @keyframes crtFlicker {
+    0%, 100% { opacity: 0.92; }
+    50% { opacity: 1; }
+    52% { opacity: 0.88; }
+    54% { opacity: 1; }
+  }
 `;

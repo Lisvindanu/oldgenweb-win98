@@ -6,6 +6,8 @@ frontend/node_modules/
 frontend/dist/
 backend/backend
 backend/tmp/
+backend/guestbook.json
+backend/guestbook.json.tmp
 
 # env
 .env

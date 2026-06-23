@@ -11,6 +11,10 @@ type Props = {
   onTaskClick: (id: string) => void;
   online: number;
   connected: boolean;
+  crtOn: boolean;
+  muted: boolean;
+  onToggleCrt: () => void;
+  onToggleMute: () => void;
 };
 
 export function Taskbar({
@@ -21,6 +25,10 @@ export function Taskbar({
   onTaskClick,
   online,
   connected,
+  crtOn,
+  muted,
+  onToggleCrt,
+  onToggleMute,
 }: Props) {
   return (
     <AppBar style={{ top: "auto", bottom: 0, zIndex: 9000 }}>
@@ -74,6 +82,24 @@ export function Taskbar({
           }}
           title={connected ? "Connected to server" : "Reconnecting…"}
         >
+          <Button
+            size="sm"
+            square
+            active={crtOn}
+            onClick={onToggleCrt}
+            title="Toggle CRT scanline effect"
+          >
+            📺
+          </Button>
+          <Button
+            size="sm"
+            square
+            active={!muted}
+            onClick={onToggleMute}
+            title={muted ? "Unmute beeps" : "Mute beeps"}
+          >
+            {muted ? "🔇" : "🔊"}
+          </Button>
           <span style={{ fontSize: 12, userSelect: "none" }}>
             {connected ? "🟢" : "🔴"} {online}
           </span>

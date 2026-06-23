@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"oldgenweb/backend/guestbook"
 	"oldgenweb/backend/hub"
 )
 
@@ -17,10 +18,17 @@ func main() {
 	h := hub.New()
 	go h.Run()
 
+	gbPath := os.Getenv("GUESTBOOK_PATH")
+	if gbPath == "" {
+		gbPath = "guestbook.json"
+	}
+	gb := guestbook.NewHandler(guestbook.NewStore(gbPath))
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		hub.ServeWS(h, w, r)
 	})
+	mux.Handle("/api/guestbook", gb)
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 	})

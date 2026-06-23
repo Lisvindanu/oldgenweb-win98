@@ -7,10 +7,18 @@ import { StartMenu } from "./StartMenu";
 import { Taskbar } from "./Taskbar";
 import { Win } from "./Win";
 import { useWindowManager } from "./useWindowManager";
+import { playClick } from "../lib/sound";
 
 const CURSOR_THROTTLE_MS = 50;
 
-export function Desktop() {
+type Props = {
+  crtOn: boolean;
+  muted: boolean;
+  onToggleCrt: () => void;
+  onToggleMute: () => void;
+};
+
+export function Desktop({ crtOn, muted, onToggleCrt, onToggleMute }: Props) {
   const wm = useWindowManager();
   const { users, connected, sendCursor } = useSocket();
   const [startOpen, setStartOpen] = useState(false);
@@ -31,6 +39,7 @@ export function Desktop() {
   const launch = (appId: string) => {
     const app = appById(appId);
     if (!app) return;
+    playClick();
     wm.open({ appId: app.id, title: app.title, width: app.width, height: app.height });
   };
 
@@ -100,6 +109,10 @@ export function Desktop() {
           onTaskClick={wm.toggleFromTaskbar}
           online={users.length}
           connected={connected}
+          crtOn={crtOn}
+          muted={muted}
+          onToggleCrt={onToggleCrt}
+          onToggleMute={onToggleMute}
         />
       </div>
     </div>
