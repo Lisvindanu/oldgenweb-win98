@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+frontend/node_modules/
+
+# build output
+frontend/dist/
+backend/backend
+backend/tmp/
+
+# env
+.env
+.env.local
+*.local
+
+# editor / os
+.DS_Store
+*.log
+.vscode/
+.idea/
