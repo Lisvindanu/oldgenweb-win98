@@ -21,6 +21,9 @@ export type OpenOptions = {
 
 let seq = 0;
 
+const MIN_WIDTH = 200;
+const MIN_HEIGHT = 140;
+
 export function useWindowManager() {
   const [windows, setWindows] = useState<WinState[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -80,6 +83,12 @@ export function useWindowManager() {
     setWindows((ws) => ws.map((w) => (w.id === id ? { ...w, x, y } : w)));
   }, []);
 
+  const resize = useCallback((id: string, width: number, height: number) => {
+    const w = Math.max(MIN_WIDTH, width);
+    const h = Math.max(MIN_HEIGHT, height);
+    setWindows((ws) => ws.map((win) => (win.id === id ? { ...win, width: w, height: h } : win)));
+  }, []);
+
   const toggleFromTaskbar = useCallback(
     (id: string) => {
       const w = windows.find((win) => win.id === id);
@@ -93,5 +102,5 @@ export function useWindowManager() {
     [windows, activeId, focus, minimize],
   );
 
-  return { windows, activeId, open, close, minimize, move, focus, toggleFromTaskbar };
+  return { windows, activeId, open, close, minimize, move, resize, focus, toggleFromTaskbar };
 }

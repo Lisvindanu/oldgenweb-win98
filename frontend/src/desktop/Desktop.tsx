@@ -83,6 +83,7 @@ export function Desktop({ crtOn, muted, onToggleCrt, onToggleMute }: Props) {
             onMinimize={() => wm.minimize(w.id)}
             onFocus={() => wm.focus(w.id)}
             onMove={(x, y) => wm.move(w.id, x, y)}
+            onResize={(width, height) => wm.resize(w.id, width, height)}
           >
             {Body ? <Body /> : null}
           </Win>

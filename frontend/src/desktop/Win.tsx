@@ -9,11 +9,22 @@ type Props = {
   onMinimize: () => void;
   onFocus: () => void;
   onMove: (x: number, y: number) => void;
+  onResize: (width: number, height: number) => void;
   children: ReactNode;
 };
 
-export function Win({ win, active, onClose, onMinimize, onFocus, onMove, children }: Props) {
+export function Win({
+  win,
+  active,
+  onClose,
+  onMinimize,
+  onFocus,
+  onMove,
+  onResize,
+  children,
+}: Props) {
   const dragging = useRef<{ dx: number; dy: number } | null>(null);
+  const resizing = useRef<{ startX: number; startY: number; w: number; h: number } | null>(null);
 
   const onPointerDown = (e: React.PointerEvent) => {
     onFocus();
@@ -30,6 +41,25 @@ export function Win({ win, active, onClose, onMinimize, onFocus, onMove, childre
 
   const onPointerUp = (e: React.PointerEvent) => {
     dragging.current = null;
+    (e.target as Element).releasePointerCapture(e.pointerId);
+  };
+
+  const onResizeDown = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    onFocus();
+    resizing.current = { startX: e.clientX, startY: e.clientY, w: win.width, h: win.height };
+    (e.target as Element).setPointerCapture(e.pointerId);
+  };
+
+  const onResizeMove = (e: React.PointerEvent) => {
+    if (!resizing.current) return;
+    const width = resizing.current.w + (e.clientX - resizing.current.startX);
+    const height = resizing.current.h + (e.clientY - resizing.current.startY);
+    onResize(width, height);
+  };
+
+  const onResizeUp = (e: React.PointerEvent) => {
+    resizing.current = null;
     (e.target as Element).releasePointerCapture(e.pointerId);
   };
 
@@ -73,6 +103,23 @@ export function Win({ win, active, onClose, onMinimize, onFocus, onMove, childre
         </span>
       </WindowHeader>
       <WindowContent style={{ flex: 1, overflow: "auto", paddingBottom: 8 }}>{children}</WindowContent>
+      <div
+        onPointerDown={onResizeDown}
+        onPointerMove={onResizeMove}
+        onPointerUp={onResizeUp}
+        aria-label="Resize"
+        style={{
+          position: "absolute",
+          right: 0,
+          bottom: 0,
+          width: 18,
+          height: 18,
+          cursor: "nwse-resize",
+          touchAction: "none",
+          background:
+            "linear-gradient(135deg, transparent 0 45%, rgba(0,0,0,0.45) 45% 55%, transparent 55% 70%, rgba(0,0,0,0.45) 70% 80%, transparent 80%)",
+        }}
+      />
     </Window>
   );
 }
