@@ -23,6 +23,27 @@ let seq = 0;
 
 const MIN_WIDTH = 200;
 const MIN_HEIGHT = 140;
+const MOBILE_BREAKPOINT = 640;
+const TASKBAR_HEIGHT = 52;
+const MOBILE_MARGIN = 6;
+
+// initialGeometry decides where/how big a freshly opened window is.
+// On phones the floating-window metaphor breaks down, so windows open
+// near-fullscreen instead of overflowing the viewport.
+function initialGeometry(opts: OpenOptions, index: number) {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  if (vw < MOBILE_BREAKPOINT) {
+    return {
+      x: MOBILE_MARGIN,
+      y: MOBILE_MARGIN,
+      width: vw - MOBILE_MARGIN * 2,
+      height: vh - TASKBAR_HEIGHT - MOBILE_MARGIN * 2,
+    };
+  }
+  const offset = (index % 6) * 28;
+  return { x: 64 + offset, y: 48 + offset, width: opts.width ?? 480, height: opts.height ?? 360 };
+}
 
 export function useWindowManager() {
   const [windows, setWindows] = useState<WinState[]>([]);
@@ -46,9 +67,7 @@ export function useWindowManager() {
         return;
       }
       const id = `win-${seq++}`;
-      const width = opts.width ?? 480;
-      const height = opts.height ?? 360;
-      const offset = (windows.length % 6) * 28;
+      const geo = initialGeometry(opts, windows.length);
       const z = nextZ();
       setWindows((ws) => [
         ...ws,
@@ -56,10 +75,7 @@ export function useWindowManager() {
           id,
           appId: opts.appId,
           title: opts.title,
-          x: 64 + offset,
-          y: 48 + offset,
-          width,
-          height,
+          ...geo,
           z,
           minimized: false,
         },

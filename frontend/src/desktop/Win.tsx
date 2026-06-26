@@ -1,6 +1,23 @@
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button, Window, WindowContent, WindowHeader } from "react95";
 import type { WinState } from "./useWindowManager";
+
+const TASKBAR_HEIGHT = 52;
+
+// Tracks the viewport so windows can be clamped to fit after rotation/resize.
+function useViewport() {
+  const [vp, setVp] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }));
+  useEffect(() => {
+    const onResize = () => setVp({ w: window.innerWidth, h: window.innerHeight });
+    window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
+    };
+  }, []);
+  return vp;
+}
 
 type Props = {
   win: WinState;
@@ -25,6 +42,7 @@ export function Win({
 }: Props) {
   const dragging = useRef<{ dx: number; dy: number } | null>(null);
   const resizing = useRef<{ startX: number; startY: number; w: number; h: number } | null>(null);
+  const vp = useViewport();
 
   const onPointerDown = (e: React.PointerEvent) => {
     onFocus();
@@ -65,15 +83,23 @@ export function Win({
 
   if (win.minimized) return null;
 
+  // Clamp to the viewport so a window never overflows the screen — covers
+  // small phones and orientation changes regardless of the stored size.
+  const availH = vp.h - TASKBAR_HEIGHT;
+  const width = Math.min(win.width, vp.w - 8);
+  const height = Math.min(win.height, availH - 8);
+  const left = Math.max(0, Math.min(win.x, vp.w - width));
+  const top = Math.max(0, Math.min(win.y, availH - height));
+
   return (
     <Window
       onMouseDown={onFocus}
       style={{
         position: "absolute",
-        left: win.x,
-        top: win.y,
-        width: win.width,
-        height: win.height,
+        left,
+        top,
+        width,
+        height,
         zIndex: win.z,
         display: "flex",
         flexDirection: "column",
